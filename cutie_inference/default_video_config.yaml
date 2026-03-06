@@ -1,0 +1,32 @@
+# Cutie model weights
+weights: weights/cutie-base-mega.pth
+
+mem_every: 10
+
+# "size" parameters represent the length of the shorter edge; -1 no resize
+#max_internal_size: -1
+max_internal_size: 480
+max_overall_size: -1
+
+use_long_term: True # Using long-term memory as XMem; for videos longer than 1 minut
+
+# ignored when !use_long_term
+max_mem_frames: -1
+
+# processed when use_long_term
+long_term:
+  count_usage: True
+  max_mem_frames: 10
+  min_mem_frames: 5
+  num_prototypes: 128
+  max_num_tokens: 10000
+  buffer_tokens: 2000
+
+amp: False
+flip_aug: False
+top_k: 30
+stagger_updates: 5
+chunk_size: -1 # number of objects to process in parallel; -1 means unlimited
+save_scores: False
+save_aux: False
+visualize: False

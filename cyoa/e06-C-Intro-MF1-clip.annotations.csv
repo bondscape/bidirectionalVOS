@@ -1,0 +1,6 @@
+region_start,region_end,source,previously_scored,cutie_forward_quality,cutie_forward_swapped,cutie_reverse_quality,cutie_reverse_swapped,best_cutie,best_cutie_swapped,best_cutie_quality,sleap_raw_quality,sleap_raw_swapped,sleap_interpolated_quality,proofed
+14512,14660,WORSTLOCS,1,GOOD,STABLE,GAUCHE,STABLE,FORWARD,STABLE,GOOD,GOOD,STABLE,,
+1923,2006,WORSTLOCS,1,GOOD,STABLE,GAUCHE,STABLE,FORWARD,STABLE,GOOD,GOOD,STABLE,,
+6002,6099,WORSTLOCS,1,GOOD,STABLE,GAUCHE,STABLE,FORWARD,STABLE,GOOD,GOOD,STABLE,,
+19168,19291,WORSTLOCS,1,GAUCHE,STABLE,GAUCHE,STABLE,REVERSE,STABLE,GAUCHE,GOOD,STABLE,,
+2,5,SWAPS,1,GOOD,STABLE,GARBAGE,SWAPPED,FORWARD,STABLE,GOOD,GOOD,STABLE,,
