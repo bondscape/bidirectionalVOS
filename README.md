@@ -19,7 +19,7 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 pip install git+https://github.com/facebookresearch/segment-anything.git
 pip install git+https://github.com/hkchengrex/Cutie.git
 python -m cutie.utils.download_models
-pip install opencv-python tk runpod
+pip install opencv-python tk runpod matplotlib
 ```
 
 # Source contents:
