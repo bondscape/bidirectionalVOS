@@ -88,7 +88,7 @@ def scheduleCutie(video_path, thumbnail_path, output_path):
         cap.set(cv2.CAP_PROP_POS_FRAMES, maskframenum)
         _, frame = cap.read()
         if frame is None:
-            print(f"Failed to read frame from {vid_path} @ frame {maskframenum}")
+            print(f"Failed to read frame from {video_path} @ frame {maskframenum}")
 
         convertSegmentedToCutieIdentities(
                 os.path.join(thumbnail_path, curmask),

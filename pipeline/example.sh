@@ -1,4 +1,4 @@
-# first, lets make some thumbnails for our example videos... (if not already done)
+# Generate thumbnails for a video:
 #python generate_thumbnails.py --video ../example_project/videos/e06-C-Intro-MF1-clip.mp4 --output_path ../example_project/thumbnails/e06-C-Intro-MF1-clip --frames_to_output 50
 #python generate_thumbnails.py --video ../example_project/videos/e06-C-Intro-MF2-clip.mp4 --output_path ../example_project/thumbnails/e06-C-Intro-MF2-clip --frames_to_output 50
 
