@@ -7,20 +7,67 @@
 # Setup Instructions
 
 We recommend creating a dedicated conda environment for this project.
-
 You can find conda here: https://www.anaconda.com/download
 
-To create and activate a conda environment suitable for running these tools:
+This workflow changes a bit if your GPU is newer (RTX 50-series+) vs older. To test which:
+
+```bash
+nvidia-smi --query-gpu=compute_cap --format=csv,noheader
+```
+
+If the number comes back < 12.0, try the following:
 ```bash
 conda create --name vos_pipeline python=3.10
 conda activate vos_pipeline
 conda install ffmpeg
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+
 pip install git+https://github.com/facebookresearch/segment-anything.git
 pip install git+https://github.com/hkchengrex/Cutie.git
 python -m cutie.utils.download_models
 pip install opencv-python tk runpod matplotlib
 ```
+
+If the number comes back >= 12.0, try the following:
+```bash
+conda create --name vos_pipeline python=3.12
+conda activate vos_pipeline
+conda install ffmpeg
+pip install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu128
+
+pip install git+https://github.com/facebookresearch/segment-anything.git
+pip install git+https://github.com/hkchengrex/Cutie.git --no-deps
+pip install \
+  cython \
+  'gitpython>=3.1' \
+  'thinplate@git+https://github.com/cheind/py-thin-plate-spline' \
+  'hickle>=5.0' \
+  'tensorboard>=2.11' \
+  'numpy>=1.21' \
+  'Pillow>=9.5' \
+  'opencv-python>=4.8' \
+  'scipy>=1.7' \
+  'pycocotools>=2.0.7' \
+  'tqdm>=4.66.1' \
+  'gradio>=3.34' \
+  'gdown>=4.7.1' \
+  'einops>=0.6' \
+  'hydra-core>=1.3.2' \
+  'charset-normalizer>=3.1.0' \
+  'netifaces>=0.11.0' \
+  'easydict' \
+  'av>=0.5.2' \
+  'requests'
+
+python -m cutie.utils.download_models
+pip install opencv-python tk runpod matplotlib
+```
+
+Either way, when you're done setting up, you can confirm torch has CUDA support with:
+```bash
+python -c "import torch; print(torch.cuda.get_device_capability()); torch.zeros(1).cuda(); print('Torch w/ CUDA support is working')"
+```
+
 
 # Source contents:
 ```
