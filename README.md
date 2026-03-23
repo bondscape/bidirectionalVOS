@@ -23,6 +23,7 @@ conda install ffmpeg
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 
 pip install git+https://github.com/facebookresearch/segment-anything.git
+wget -O segmenter/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 pip install git+https://github.com/hkchengrex/Cutie.git
 python -m cutie.utils.download_models
 pip install opencv-python tk runpod matplotlib
@@ -36,6 +37,7 @@ conda install ffmpeg
 pip install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu128
 
 pip install git+https://github.com/facebookresearch/segment-anything.git
+wget -O segmenter/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 pip install git+https://github.com/hkchengrex/Cutie.git --no-deps
 pip install \
   cython \
