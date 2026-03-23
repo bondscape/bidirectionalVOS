@@ -65,7 +65,7 @@ pip install opencv-python tk runpod matplotlib
 
 Either way, when you're done setting up, you can confirm torch has CUDA support with:
 ```bash
-python -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'; print(f'CUDA OK: {torch.cuda.get_device_name(0)}')"
+python -c "import warnings; warnings.filterwarnings('error'); import torch; torch.tensor(1, device='cuda'); print('CUDA OK')"
 ```
 
 
