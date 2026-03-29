@@ -69,7 +69,7 @@ for direction in ["forward", "reverse"]:
     for ridx in range(len(rstarts)):
         rstart = rstarts[ridx]
         # stitch the segments
-        if rstart == 0:
+        if ridx == 0:
             # this segment shall be baseline
             segments[direction][rstart]["flip"] = False
             continue
@@ -103,10 +103,10 @@ for direction in ["forward", "reverse"]:
 
 first_frame = segments["forward"][rstarts[0]]["start"]
 last_frame = segments["forward"][rstarts[-1]]["end"]
-total_frames = last_frame - first_frame + 1
+total_frames = last_frame + 1
 
-comparisons = np.zeros(last_frame - first_frame + 1)
-alt_comparisons = np.zeros(last_frame - first_frame + 1)
+comparisons = np.zeros(last_frame + 1)
+alt_comparisons = np.zeros(last_frame + 1)
 
 last_segment_start = time.time()
 
@@ -158,12 +158,12 @@ for ridx in range(len(rstarts)):
                                              'masks',
                                              shape=downscaled_forward_dataset_shape,
                                              chunks=downscaled_chunk_size,
-                                             dtype='uint8', compression='gzip')
+                                             dtype='uint8', compression='gzip', fillvalue=255)
     downscaled_unflipped_reverse_dataset = downscaled_unflipped_reverse_h5.create_dataset(
                                              'masks',
                                              shape=downscaled_reverse_dataset_shape,
                                              chunks=downscaled_chunk_size,
-                                             dtype='uint8', compression='gzip')
+                                             dtype='uint8', compression='gzip', fillvalue=255)
 
     if not combined_out_created:
         # open the masks_forward.h5 and masks_reverse.h5 outfiles
@@ -185,12 +185,12 @@ for ridx in range(len(rstarts)):
                                              'masks',
                                              shape=out_combined_ds_shape,
                                              chunks=out_combined_ds_chunk_size,
-                                             dtype='uint8', compression='gzip')
+                                             dtype='uint8', compression='gzip', fillvalue=255)
         out_combined_rev_ds = out_combined_rev_h5.create_dataset(
                                              'masks',
                                              shape=out_combined_ds_shape,
                                              chunks=out_combined_ds_chunk_size,
-                                             dtype='uint8', compression='gzip')
+                                             dtype='uint8', compression='gzip', fillvalue=255)
         combined_out_created = True
 
 
