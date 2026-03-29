@@ -53,7 +53,7 @@ def calculateIOUs(forward_segmentations, reverse_segmentations):
 
 dirs = []
 for entry in os.scandir(segments_base):
-    if entry.is_dir() and None != re.match("^[0-9\-]+\.", entry.name):
+    if entry.is_dir() and None != re.match("^[0-9-]+\\.", entry.name):
         region = entry.name.split(".")[0]
         direction = entry.name.split(".")[1]
         region_start = int(region.split("-")[0])
