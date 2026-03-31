@@ -26,13 +26,14 @@ def mouseEvent(event, x, y, flags, param):
     if (event == cv2.EVENT_LBUTTONDOWN):
         mousePointX = x
         mousePointY = y
-        print("Click event fired")
         clickEventFired = True
 
 cv2.namedWindow("main", cv2.WINDOW_NORMAL)
 cv2.setMouseCallback("main", mouseEvent)
 
 def getAnimalIdentities(label_path):
+    if not os.path.exists(label_path):
+        return { "identities": {}}
     with open(label_path, "r") as fh:
         identities = json.loads(fh.read())
         return identities
@@ -63,7 +64,7 @@ def LabelFrame(video_path, label_path):
     labeledAnimals = {"female": [], "male": []}
 
     labeledAnimals = getAnimalIdentities(label_path)["identities"]
-    print(labeledAnimals)
+    print(f"Animal identities: {labeledAnimals}")
 
     dataChanged = False
 
