@@ -126,12 +126,13 @@ def scheduleCutie(video_path, thumbnail_path, output_path):
                 print(f"Skipping {os.path.basename(fwd_out_dir)} - already complete")
             else:
                 print(f"Adding task for {os.path.basename(fwd_out_dir)}")
-                fh.write(f"python ../cutie_inference/cutie_inference.py --start_frame {forfnum} --end_frame {rorfnum} --video \"{os.path.abspath(video_path)}\" --common_mask_dir \"{os.path.abspath(common_masks_dir)}\" --common_frames_dir \"{os.path.abspath(common_frames_dir)}\" --clip_mask_dir \"{os.path.abspath(clip_mask_fwddir)}\" --output_dir \"{os.path.abspath(fwd_out_dir)}\" --direction=forward --clipvideo {os.path.abspath(fwdclipvid)}\n")
+                fh.write(f"python ../cutie_inference/cutie_inference.py --start_frame {forfnum} --end_frame {rorfnum} --video \"{os.path.abspath(video_path)}\" --common_frames_dir \"{os.path.abspath(common_frames_dir)}\" --clip_mask_dir \"{os.path.abspath(clip_mask_fwddir)}\" --output_dir \"{os.path.abspath(fwd_out_dir)}\" --direction=forward --clipvideo {os.path.abspath(fwdclipvid)}\n")
+
             if os.path.exists(os.path.join(rev_out_dir, "masks.combined")):
                 print(f"Skipping {os.path.basename(rev_out_dir)} - already complete")
             else:
                 print(f"Adding task for {os.path.basename(rev_out_dir)}")
-                fh.write(f"python ../cutie_inference/cutie_inference.py --start_frame {forfnum} --end_frame {rorfnum} --video \"{os.path.abspath(video_path)}\" --common_mask_dir  \"{os.path.abspath(common_masks_dir)}\" --common_frames_dir  \"{os.path.abspath(common_frames_dir)}\" --clip_mask_dir  \"{os.path.abspath(clip_mask_revdir)}\" --output_dir \"{os.path.abspath(rev_out_dir)}\" --direction=reverse --clipvideo {os.path.abspath(revclipvid)}\n")
+                fh.write(f"python ../cutie_inference/cutie_inference.py --start_frame {forfnum} --end_frame {rorfnum} --video \"{os.path.abspath(video_path)}\" --common_frames_dir  \"{os.path.abspath(common_frames_dir)}\" --clip_mask_dir  \"{os.path.abspath(clip_mask_revdir)}\" --output_dir \"{os.path.abspath(rev_out_dir)}\" --direction=reverse --clipvideo {os.path.abspath(revclipvid)}\n")
     print(f"Cutie inference tasks for {exp_name} added to inference_tasks.txt")
 
 scheduleCutie(args.video, args.thumbnail_path, args.output_path)
