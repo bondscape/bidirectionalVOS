@@ -55,7 +55,7 @@ def combineFrames(direction, output_path, output_masks_h5):
     print(f"Stored {len(infiles)} masks in {end_time-start_time}s @ {(end_time-start_time)/len(infiles)}s/frame")
     return
 
-def process_video(cutie_model, frames_dir, masks_dir, video_path, clip_mask_dir, output_dir, device):
+def process_video(cutie_model, frames_dir, video_path, clip_mask_dir, output_dir, device):
     os.makedirs(output_dir, exist_ok=True)
     cutie_model = cutie_model.to(device).eval()
     processor = InferenceCore(cutie_model, cfg=cutie_model.cfg)
@@ -64,7 +64,7 @@ def process_video(cutie_model, frames_dir, masks_dir, video_path, clip_mask_dir,
     print(f"Model is on: {next(cutie_model.parameters()).device}")
 
     # how many objects are we segmenting?
-    mask_files = sorted(glob.glob(os.path.join(masks_dir, "*.png")))
+    mask_files = sorted(glob.glob(os.path.join(clip_mask_dir, "*.png")))
     first_mask = np.array(Image.open(mask_files[0]))
     objects = np.unique(first_mask)
     objects = objects[objects != 0].tolist()
@@ -236,7 +236,7 @@ with open_dict(cutie_model.cfg):
     cutie_model.cfg = OmegaConf.merge(cutie_model.cfg, overrides)
 
 print(f"Performing cutie inference forward from: {args.clipvideo}")
-process_video(cutie_model, args.common_frames_dir, args.common_mask_dir, args.clipvideo, args.clip_mask_dir, args.output_dir, args.device)
+process_video(cutie_model, args.common_frames_dir, args.clipvideo, args.clip_mask_dir, args.output_dir, args.device)
 
 clipvideobase = os.path.splitext(os.path.split(clipvideo)[1])[0]
 
