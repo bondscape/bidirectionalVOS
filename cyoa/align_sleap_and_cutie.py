@@ -606,7 +606,7 @@ def align_sleap(sleap_data,
                 sys.exit(1)
 
     if sleap_save_path != "" and sleap_save_path != None:
-        print("Saving sleap data to {sleap_save_path}")
+        print(f"Saving sleap data to {sleap_save_path}")
         np.save(sleap_save_path, sleap_with_cutie_ident)
 
     print(f"Trivial infills were desired:")
