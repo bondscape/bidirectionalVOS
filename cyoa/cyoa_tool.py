@@ -5,7 +5,12 @@ import os
 import sys
 import json
 import h5py
+
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+plt.ion()
+
 import pandas as pd
 from tkinter import simpledialog
 from scipy.interpolate import interp1d
@@ -201,6 +206,7 @@ def askCutieQuestions(thiszod, mp4_in, exp, direction, masks_dir_ds, masks_altdi
 
     control_figure_section_selector = "LEFT"
 
+    control_dirtyplot = True
     playing = True
     lzod = section_end - section_start + 1
     isSwapped = False
@@ -278,6 +284,7 @@ def askCutieQuestions(thiszod, mp4_in, exp, direction, masks_dir_ds, masks_altdi
                     saveAll(frame_with_overlay)
                 saveFrame = False
             keyres = cv2.waitKey(INPUT_DELAY_MS)
+            for f in map(plt.figure, plt.get_fignums()): f.canvas.flush_events()
             if (keyres & 0xFF) == ord('-'):
                 INPUT_DELAY_MS += 1
             if (keyres & 0xFF) in [ord('='), ord('+')]:
@@ -407,6 +414,7 @@ def askSleapQuestions(thiszod, mp4_in, exp, sleap_locations):
                 saveAll(frame_with_overlay)
                 saveFrame = False
             keyres = cv2.waitKey(INPUT_DELAY_MS)
+            for f in map(plt.figure, plt.get_fignums()): f.canvas.flush_events()
             if (keyres & 0xFF) == ord('-'):
                 INPUT_DELAY_MS += 1
             if (keyres & 0xFF) in [ord('='), ord('+')]:
@@ -576,6 +584,7 @@ def askInterpolatedSleapQuestions(thiszod, mp4_in, exp, sleap_locations, swapped
                 saveAll(frame_with_overlay)
                 saveFrame = False
             keyres = cv2.waitKey(INPUT_DELAY_MS)
+            for f in map(plt.figure, plt.get_fignums()): f.canvas.flush_events()
             if (keyres & 0xFF) == ord('-'):
                 INPUT_DELAY_MS += 1
             if (keyres & 0xFF) in [ord('='), ord('+')]:
@@ -827,9 +836,10 @@ flipLocs = np.where(1*(diff[1:] != diff[:-1]))[0]
 
 for fl in flipLocs:
     if previously_scored_regions[fl] == 0:
-        min_fl = max(0, fl-4)
-        max_fl = min(iou.shape[0], fl+4)
-        candidate_search_quality[min_fl:max_fl] = 1.0
+        min_fl = max(0, fl-1)
+        max_fl = min(iou.shape[0], fl+1)
+        candidate_search_quality[min_fl:max_fl+1] = 1.0
+        track_quality[min_fl:max_fl+1] = 1.0
 
 # any previously scored section doesn't need to be rescored.
 candidate_search_quality[previously_scored_regions > 0] = 0
@@ -858,7 +868,7 @@ for mode, locs in [["SWAPS", swapLocs], ["WORSTLOCS", worstLocs]]:
 
 fig_local = ""
 control_seeked = False
-control_dirtyplot = False
+control_dirtyplot = True
 control_figure_section_selector = "LEFT"
 control_window_mode = "ZOD"
 
@@ -868,11 +878,7 @@ def redraw_local_plot(thiszod, section_start, section_end, preview_start, previe
     loc = section_start + np.argmax(track_quality[section_start:section_end+1])
     locquality = track_quality[loc]
 
-    print(f"All figures before: {plt.get_fignums()}")
-    print(f"Current figure before: {plt.gcf().number if plt.get_fignums() else 'None'}")
-
     # show a couple of graphs to provide some context on tracking
-
     if fig_local == "" or not plt.fignum_exists(fig_local.number):
         fig_local = plt.figure(figsize=(6,4))
         cid = fig_local.canvas.mpl_connect('button_press_event', local_plot_onclick)
@@ -884,16 +890,10 @@ def redraw_local_plot(thiszod, section_start, section_end, preview_start, previe
     plt.suptitle(f"ZOD-{mode} [Local] Q={1-locquality:0.02} @ F:{loc} W:{section_end}-{section_start}")
     ax1.set_title(f"Click to set {control_window_mode} {control_figure_section_selector} boundary.")
 
-    #OLD COLOR
-    #plt.plot(np.arange(track_quality.shape[0]), 1-track_quality, color="g", alpha=0.3)
     ax2.plot(np.arange(track_quality.shape[0]), 1-track_quality, color="blue", alpha=1.0)
 
-    #OLD COLOR
-    #plt.plot(np.arange(iou.shape[0]), iou, color="coral", alpha=0.4)
     ax1.plot(np.arange(iou.shape[0]), iou, color="#367E7F", alpha=0.8)
 
-    #OLD COLOR
-    #plt.plot(np.arange(alt_iou.shape[0]), alt_iou, color="b", alpha=0.4)
     ax1.plot(np.arange(alt_iou.shape[0]), alt_iou, color="#D95D27", alpha=0.8)
 
     ax1.hlines(1-QUALITY_THRESHOLD, xmin=0, xmax=track_quality.shape[0])
@@ -910,8 +910,7 @@ def redraw_local_plot(thiszod, section_start, section_end, preview_start, previe
 
     inds = np.arange(track_quality.shape[0])
     in_section = np.logical_and(inds >= section_start, inds <= section_end)
-    #OLD COLOR
-    #plt.fill_between(np.arange(track_quality.shape[0]), in_section, step="mid", alpha=0.2, color="b")
+
     ax1.fill_between(np.arange(track_quality.shape[0]), in_section, step="mid", alpha=0.5, color="#FFB61E")
     ax2.fill_between(np.arange(track_quality.shape[0]), in_section, step="mid", alpha=0.5, color="#FFB61E")
     d = preview_end - preview_start
@@ -946,10 +945,6 @@ def redraw_local_plot(thiszod, section_start, section_end, preview_start, previe
         zscored = zod["previously_scored"]
         zsource = zod["source"]
 
-        if zstart > 342000 and zstart < 344000:
-            print(f"doing")
-            print(thiszod)
-            print(zod)
         if zsource == "WORSTLOCS":
             if zscored:
                 other_scored_worstlocs = np.logical_or(other_scored_worstlocs,
@@ -964,17 +959,9 @@ def redraw_local_plot(thiszod, section_start, section_end, preview_start, previe
             else:
                 other_swaps = np.logical_or(other_swaps,
                                             np.logical_and(inds >= zstart, inds <= zend))
-    #ax1.fill_between(inds, other_swaps, step="mid", alpha=0.5, color="tab:olive", hatch='X')
-    #ax1.fill_between(inds, other_scored_swaps, step="mid", alpha=0.5, color="tab:olive", hatch='///')
-    #ax2.fill_between(inds, other_swaps, step="mid", alpha=0.5, color="tab:olive", hatch='X')
-    #ax2.fill_between(inds, other_scored_swaps, step="mid", alpha=0.5, color="tab:olive", hatch='///')
 
-    #ax1.fill_between(inds, other_worstlocs, step="mid", alpha=0.5, color="tab:red", hatch='X')
-    #ax1.fill_between(inds, other_scored_worstlocs, step="mid", alpha=0.5, color="tab:red", hatch='///')
-    #ax2.fill_between(inds, other_worstlocs, step="mid", alpha=0.5, color="tab:red", hatch='X')
-    #ax2.fill_between(inds, other_scored_worstlocs, step="mid", alpha=0.5, color="tab:red", hatch='///')
-
-    fig.canvas.draw()
+    fig.canvas.draw_idle()
+    fig.canvas.flush_events()
     if nevershown:
         plt.show(block=False)
         nevershown = False
@@ -1135,8 +1122,6 @@ def update_zod_inventory():
                 print(f"in zod-inventory update: {loc} is already captured, skipping")
                 continue
 
-            print(f"Evaluating {loc}")
-
             # otherwise, estimate the region parameters - prune any neighboring zones
             r_start_orig = max(0, loc - int(region_size/2))
             r_end_orig = min(loc + int(region_size/2), iou.shape[0])
@@ -1162,7 +1147,7 @@ def update_zod_inventory():
             if r_start_orig != r_start or r_end_orig != r_end:
                 print(f"after early neighbor pruning, {r_start_orig}:{r_end_orig} -> {r_start}:{r_end}")
 
-            if not rescan_mode:
+            if not rescan_mode and r_end-r_start > 50:
                 # let's try narrowing these down a little bit - narrow window until peaks > 1
                 q_tmp = np.zeros_like(track_quality)
                 q_tmp[r_start:r_end] = track_quality[r_start:r_end]
