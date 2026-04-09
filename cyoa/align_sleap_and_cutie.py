@@ -30,8 +30,11 @@ def loadPartsConfig(parts_config_path):
 
 def getAnimalIdentities(identities_config_path):
     with open(identities_config_path, "r") as fh:
-        identities = json.loads(fh.read())
-        return identities
+        annotation = json.loads(fh.read())
+        annotation_frame = 0
+        if "annotation_frame" in annotation:
+            annotation_frame = int(annotation["annotation_frame"])
+        return annotation["identities"], annotation_frame
 
 def group_indices(indices):
     if len(indices) == 0:
@@ -76,10 +79,9 @@ n_valid_node_ids = 0
 parts_config = loadPartsConfig(args.parts_config)
 valid_node_names = parts_config["valid_node_names"]
 
-anSexes = getAnimalIdentities(args.identities_config_path)["identities"]
+anSexes, annotation_frame = getAnimalIdentities(args.identities_config_path)
 
 CHUNK_LENGTH = 512
-
 
 def load_zod_csv(csvpath):
     df = pd.DataFrame(columns = ["region_start", "region_end", "source", "previously_scored", "cutie_forward_quality", "cutie_forward_swapped", "cutie_reverse_quality", "cutie_reverse_swapped", "best_cutie", "best_cutie_swapped", "best_cutie_quality", "sleap_raw_quality", "sleap_raw_swapped", "sleap_interpolated_quality"])
@@ -343,25 +345,30 @@ def export_consensus_cutie(
         d0M = ((c_cutie_an0[0] - annot_M[0])**2 + (c_cutie_an0[1] - annot_M[1])**2) ** 0.5
         d1F = ((c_cutie_an1[0] - annot_F[0])**2 + (c_cutie_an1[1] - annot_F[1])**2) ** 0.5
         d1M = ((c_cutie_an1[0] - annot_M[0])**2 + (c_cutie_an1[1] - annot_M[1])**2) ** 0.5
-        print(d0F)
-        print(d0M)
-        print(d1F)
-        print(d1M)
+        print(f"\tDifference between anid=0 CoM and frame={annotation_frame} female annotation: {d0F}")
+        print(f"\tDifference between anid=0 CoM and frame={annotation_frame} male annotation: {d0M}")
+        print(f"\tDifference between anid=1 CoM and frame={annotation_frame} female annotation: {d1F}")
+        print(f"\tDifference between anid=1 CoM and frame={annotation_frame} male annotation: {d1M}")
+        print(f"A correct assignment should have a LOW total score!")
         if d0F < d0M and d1M < d1F:
+            print("Assigning FEMALE to anid0, MALE to anid1")
             return ["FEMALE", "MALE"]
         elif d0M < d0F and d1F < d1M:
+            print("Assigning MALE to anid0, FEMALE to anid1")
             return ["MALE", "FEMALE"]
         else:
-            print("Unforeseen mapping issue!")
+            print("Unforeseen mapping issue! Assigning MALE to anid0, FEMALE to anid1")
             return ["MALE", "FEMALE"]
             sys.exit(1)
 
-    cfwd0 = getAnCxy(cutie_masks["masks_fwd_ds"][0], 1)
-    cfwd1 = getAnCxy(cutie_masks["masks_fwd_ds"][0], 2)
-    crev0 = getAnCxy(cutie_masks["masks_rev_ds"][0], 1)
-    crev1 = getAnCxy(cutie_masks["masks_rev_ds"][0], 2)
-    print(anSexes)
+    print(f"Aligning animal identities based on frame {annotation_frame}: {anSexes}")
+    cfwd0 = getAnCxy(cutie_masks["masks_fwd_ds"][annotation_frame], 1)
+    cfwd1 = getAnCxy(cutie_masks["masks_fwd_ds"][annotation_frame], 2)
+    crev0 = getAnCxy(cutie_masks["masks_rev_ds"][annotation_frame], 1)
+    crev1 = getAnCxy(cutie_masks["masks_rev_ds"][annotation_frame], 2)
+    print("Assigning sexes to forward mask tracks:")
     cfwd_sexmap = mapSexes(anSexes["female"], anSexes["male"], cfwd0, cfwd1)
+    print("Assigning sexes to reverse mask tracks:")
     crev_sexmap = mapSexes(anSexes["female"], anSexes["male"], crev0, crev1)
 
     # Note: output track 1 = female, 2 = male

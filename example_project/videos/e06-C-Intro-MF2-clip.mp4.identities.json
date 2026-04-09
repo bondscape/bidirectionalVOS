@@ -1,12 +1,13 @@
 {
     "identities": {
         "female": [
-            772,
-            876
+            762,
+            862
         ],
         "male": [
-            832,
-            658
+            734,
+            652
         ]
-    }
+    },
+    "annotation_frame": 8
 }
