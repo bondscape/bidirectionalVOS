@@ -89,8 +89,8 @@ python -c "import warnings; warnings.filterwarnings('error'); import torch; torc
 # Try it out on the example project:
 
 We've included a small clip from two videos of opposite sex voles to allow for convenient exploration with
-this toolset, located in the example_project directory.  Several steps of the processing pipeline are completed
-for you in advance for your convenience, though they can be safely repeated or explored.
+this toolset, located in the example_project directory.  Processing on the example project is already completed,
+but can be safely explored or repeated using the steps below.  You can view example output in example_project/output/
 
 Steps:
 
@@ -119,7 +119,7 @@ python schedule_cutie_inference.py --video ../example_project/videos/e06-C-Intro
 python schedule_cutie_inference.py --video ../example_project/videos/e06-C-Intro-MF2-clip.mp4 --thumbnail_path ../example_project/thumbnails/e06-C-Intro-MF2-clip/proofed --output_path ../example_project/cutie_inference/e06-C-Intro-MF2-clip
 ```
 
-Actually execute the tasks in inference_tasks.txt - will take a while!
+Actually execute the tasks in inference_tasks.txt - which will take a while!
 
 After all cutie inference is done, combine segments together:
 ```bash
@@ -132,7 +132,7 @@ Using the CYOA tools to resolve the disagreements between video segmentations an
 cd ../cyoa
 python animal_labeler.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4
 python cyoa_tool.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4 --cutie_path  ../example_project/cutie_inference/e06-C-Intro-MF1-clip/cutie --sleap_path ../example_project/sleap/tracked/e06-C-Intro-MF1.labels.0.tracked.cleaned.h5
-python align_sleap_and_cutie.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4 --cutie_path  ../example_project/cutie_inference/e06-C-Intro-MF1-clip/cutie --sleap_path ../example_project/sleap/tracked/e06-C-Intro-MF1.labels.0.tracked.cleaned.h5 --output_path ./output/e06-C-Intro-MF1-clip --parts_config parts_config.json --identities_config_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4.identities.json --annotations e06-C-Intro-MF1-clip.annotations.csv --do_video
+python align_sleap_and_cutie.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4 --cutie_path  ../example_project/cutie_inference/e06-C-Intro-MF1-clip/cutie --sleap_path ../example_project/sleap/tracked/e06-C-Intro-MF1.labels.0.tracked.cleaned.h5 --output_path ../example_project/output/e06-C-Intro-MF1-clip --parts_config parts_config.json --identities_config_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4.identities.json --annotations e06-C-Intro-MF1-clip.annotations.csv --do_video
 ```
 
 
