@@ -4,6 +4,17 @@
 
 (This guide is still a work in progress)
 
+This project is a pipeline that allows for long-term, identity-stable tracking of interacting animals with very limited user intervention required.  This pipeline provides identity-consistent masks which are used for automated correction of errors in keypoint tracking, which are a common challenge in making use of keypoint-based pose estimation frameworks.
+
+Segmentation masks are generated via bidirectional video-objection segmentation performed here by [**Cutie**](https://github.com/hkchengrex/Cutie) (Cheng et al., 2024), and resolved into high quality consensus masks through limited human intervention.
+
+The project, its limitations, and example applications are described in our preprint:
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**[Identity-stable multi-animal tracking using bidirectional segmentation with object-level memory](https://www.biorxiv.org/content/10.1101/2025.09.22.677949v1)** [bioRxiv, 2025]  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shuyu Wang, Kara Quine, Audrey Jordan, Shreya Dasari, Devanand S. Manoli, Christoph Kirst.
+
+![demo](rsrc/alignment_example_lq.gif)
+
 # Setup Instructions
 
 We recommend creating a dedicated conda environment for this project.
@@ -135,4 +146,9 @@ python cyoa_tool.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.
 python align_sleap_and_cutie.py --video_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4 --cutie_path  ../example_project/cutie_inference/e06-C-Intro-MF1-clip/cutie --sleap_path ../example_project/sleap/tracked/e06-C-Intro-MF1.labels.0.tracked.cleaned.h5 --output_path ../example_project/output/e06-C-Intro-MF1-clip --parts_config parts_config.json --identities_config_path ../example_project/videos/e06-C-Intro-MF1-clip.mp4.identities.json --annotations e06-C-Intro-MF1-clip.annotations.csv --do_video
 ```
 
+## References
 
+* We use Cutie for video segmentation:
+  * Cheng, H. K., Oh, S. W., Price, B., Lee, J.-Y., & Schwing, A. (2024). Putting the object back into video object segmentation. *CVPR 2024*. https://github.com/hkchengrex/Cutie
+* We use Segmany Anything to assist with keyframe generation (i.e. seed inputs for Cutie):
+  * Kirillov, A., Mintun, E., Ravi, N., Mao, H., Rolland, C., Gustafson, L., Xiao, T., Whitehead, S., Berg, A. C., Lo, W.-Y., Dollár, P., & Girshick, R. (2023). Segment Anything. *arXiv:2304.02643*. https://github.com/facebookresearch/segment-anything
