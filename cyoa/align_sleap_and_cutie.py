@@ -164,6 +164,7 @@ def resolveAnnotations(frame_count, csvpath):
         if c_best == "REVERSE":
             cutie_mappings["cutie_preferred"][r_start:r_end+1] = 1
         if c_best in ["NONE", ""]:
+            print(f"Remaster located at {r_start} to {r_end+1}")
             cutie_mappings["sleap_remaster_infill"][r_start:r_end+1] = 1
 
         if slp_raw_quality in ["GOOD", "GAUCHE"]:
@@ -587,6 +588,7 @@ def align_sleap(sleap_data,
                 # sleap-data that has been manually aligned.
                 # associate sleap tracks with their counterparts in the prior frame, then
                 # this assignment is safe to keep until next regular->infill transition.
+                print(f"Remaster for frame {framenum}")
                 prev_s0_xy = np.nanmean(sleap_with_cutie_ident[framenum-1, :, :, 0], axis=0)
                 prev_s1_xy = np.nanmean(sleap_with_cutie_ident[framenum-1, :, :, 1], axis=0)
                 infill_s0_xy = np.nanmean(sleap_remaster[framenum-1, :, :, 0], axis=0)
@@ -876,7 +878,7 @@ cutie_masks["rejected_masks_ds"] = rejected_masks_fh["masks"]
 sleap_to_consensus_cutie_masks_path = os.path.join(args.output_path, f"{exp}.sleap_x_consensus_cutie_mapping.npy")
 if os.path.exists(sleap_to_consensus_cutie_masks_path):
     print("Loading sleap<=>cutie mask tables.")
-    sleap_to_consensus_cutie_masks = np.load(sleap_to_consensus_cutie_masks_path)
+    sleap_to_consensus_cutie_masks = np.load(sleap_to_consensus_cutie_masks_path)[:frame_count]
     print(sleap_to_consensus_cutie_masks.shape)
 else:
     sleap_to_consensus_cutie_masks = sleap_to_consensus_cutie_mapping(
