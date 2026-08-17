@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import subprocess
 import sys
 import glob
 import tempfile
@@ -15,6 +17,33 @@ import time
 from PIL import Image
 import argparse
 import h5py
+
+def get_video_frame_count(video_path):
+    cache_path = Path(f"{video_path}.frame_count")
+
+    if cache_path.exists():
+        return int(cache_path.read_text().strip())
+
+    # otherwise...
+    print("=== Note: Measuring video length *reliably*, which may take a bit.")
+    print("  (Some video containers are not accurate about content lengths)")
+
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-count_frames",
+            "-show_entries", "stream=nb_read_frames",
+            "-of", "default=nokey=1:noprint_wrappers=1",
+            video_path,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    count = int(result.stdout.strip())
+    cache_path.write_text(f"{count}")
+    return count
 
 def combineFrames(direction, output_path, output_masks_h5):
     print(f"Combining frames in for {output_masks_h5} - direction: {direction}")
@@ -91,7 +120,7 @@ def process_video(cutie_model, frames_dir, video_path, clip_mask_dir, output_dir
         print(f"Failed to open {video_path}!")
         sys.exit()
 
-    total_frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    total_frame_count = get_video_frame_count(video_path)
 
     # Begin at the beginning!
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -108,12 +137,17 @@ def process_video(cutie_model, frames_dir, video_path, clip_mask_dir, output_dir
     with torch.inference_mode():
         while cap.isOpened():
             if frame_idx % 100 == 0:
-                print(f"Frame {frame_idx} / {total_frame_count}")
+                print(f"Frame {frame_idx} / {total_frame_count-1}")
 
             _, frame = cap.read()
-            if frame is None or frame_idx > total_frame_count:
-                print("Completed reading input file (or failed to read another frame)")
-                break
+            if frame is None:
+                print(f"Last successful read: frame {frame_idx-1}/{total_frame_count-1}")
+                if frame_idx == total_frame_count:
+                    print("Completed reading input file")
+                    break
+                else:
+                    print("Failed to read expected length from video!")
+                    sys.exit(1)
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
             frame_torch = torch.from_numpy(frame).permute(2, 0, 1).to(device)
@@ -160,7 +194,8 @@ def reverse_video(inpath, outpath):
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    nframes = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    nframes = get_video_frame_count(inpath)
     print(f"Reversing {nframes} frames from {inpath}")
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -211,16 +246,16 @@ print(f"scanning for {args.clipvideo} if does not exist")
 if direction == "forward":
     if not videoExists(args.clipvideo):
         saferm(args.clipvideo)
-        print(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\" \"{args.clipvideo}\"")
-        os.system(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\" \"{args.clipvideo}\"")
+        print(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\",setpts=PTS-STARTPTS -an \"{args.clipvideo}\"")
+        os.system(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\",setpts=PTS-STARTPTS -an \"{args.clipvideo}\"")
     clipvideo_forward = clipvideo
 elif direction == "reverse":
     clipvideo_forward = args.clipvideo + ".forward.mp4"
     if not videoExists(args.clipvideo) or not videoExists(clipvideo_forward):
         saferm(args.clipvideo)
         saferm(clipvideo_forward)
-        print(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\" \"{clipvideo_forward}\"")
-        os.system(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\" \"{clipvideo_forward}\"")
+        print(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\",setpts=PTS-STARTPTS -an \"{clipvideo_forward}\"")
+        os.system(f"ffmpeg -i \"{args.video}\" -vf select=\"between(n\\,{begin}\\,{end})\",setpts=PTS-STARTPTS -an \"{clipvideo_forward}\"")
         print(f"ffmpeg -i {clipvideo_forward} -vf reverse {args.clipvideo}")
         #os.system(f"ffmpeg -i {clipvideo_forward} -vf reverse {args.clipvideo}")
         reverse_video(clipvideo_forward, args.clipvideo)

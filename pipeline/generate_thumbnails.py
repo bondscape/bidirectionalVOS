@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import os
+import subprocess
+from pathlib import Path
 import sys
 import cv2
 import argparse
@@ -12,6 +14,33 @@ def write_job_complete(outpath, success):
             f.write("Job success.\n")
         else:
             f.write("Job failure.\n")
+
+def get_video_frame_count(video_path):
+    cache_path = Path(f"{video_path}.frame_count")
+
+    if cache_path.exists():
+        return int(cache_path.read_text().strip())
+
+    # otherwise...
+    print("=== Note: Measuring video length *reliably*, which may take a bit.")
+    print("  (Some video containers are not accurate about content lengths)")
+
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-count_frames",
+            "-show_entries", "stream=nb_read_frames",
+            "-of", "default=nokey=1:noprint_wrappers=1",
+            video_path,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    count = int(result.stdout.strip())
+    cache_path.write_text(f"{count}")
+    return count
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--video", required = True)
@@ -25,13 +54,15 @@ infile = os.path.abspath(args.video)
 output_dir = os.path.abspath(args.output_path)
 os.makedirs(output_dir, exist_ok=True)
 
-print(f"Opening {infile} for frame generation")
-cap = cv2.VideoCapture(infile)
+n_frames = get_video_frame_count(infile)
+if not n_frames > 0:
+    print(f"Failed to generate frame count on input video {infile}!")
+    sys.exit(1)
 
-n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-if n_frames <= 0:
-    print(f"Failed to open input video!")
-    write_job_complete(output_dir, False)
+print(f"Opening {infile} for frame extraction")
+cap = cv2.VideoCapture(infile)
+if not cap.isOpened():
+    print(f"Failed to open {infile} for thumbnail frame extraction")
     sys.exit(1)
 
 frames_to_output = int(args.frames_to_output)

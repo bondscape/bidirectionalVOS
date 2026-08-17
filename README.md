@@ -30,21 +30,21 @@ If the number comes back < 12.0, try the following:
 ```bash
 conda create --name vos_pipeline python=3.10
 conda activate vos_pipeline
-conda install ffmpeg
+conda install -c conda-forge x264 ffmpeg
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 
 pip install git+https://github.com/facebookresearch/segment-anything.git
 wget -O segmenter/sam_vit_h_4b8939.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 pip install git+https://github.com/hkchengrex/Cutie.git
 python -m cutie.utils.download_models
-pip install opencv-python tk runpod matplotlib
+pip install opencv-python tk runpod matplotlib colorcet packaging
 ```
 
 If the number comes back >= 12.0, try the following:
 ```bash
 conda create --name vos_pipeline python=3.12
 conda activate vos_pipeline
-conda install ffmpeg
+conda install -c conda-forge x264 ffmpeg
 pip install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu128
 
 pip install git+https://github.com/facebookresearch/segment-anything.git
@@ -73,7 +73,7 @@ pip install \
   'requests'
 
 python -m cutie.utils.download_models
-pip install opencv-python tk runpod matplotlib
+pip install opencv-python tk runpod matplotlib colorcet packaging
 ```
 
 Either way, when you're done setting up, you can confirm torch has CUDA support with:

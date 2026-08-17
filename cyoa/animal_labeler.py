@@ -1,4 +1,6 @@
 import os
+import subprocess
+from pathlib import Path
 import cv2
 import sys
 import json
@@ -28,6 +30,33 @@ def mouseEvent(event, x, y, flags, param):
         mousePointY = y
         clickEventFired = True
 
+def get_video_frame_count(video_path):
+    cache_path = Path(f"{video_path}.frame_count")
+
+    if cache_path.exists():
+        return int(cache_path.read_text().strip())
+
+    # otherwise...
+    print("=== Note: Measuring video length *reliably*, which may take a bit.")
+    print("  (Some video containers are not accurate about content lengths)")
+
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-count_frames",
+            "-show_entries", "stream=nb_read_frames",
+            "-of", "default=nokey=1:noprint_wrappers=1",
+            video_path,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    count = int(result.stdout.strip())
+    cache_path.write_text(f"{count}")
+    return count
+
 cv2.namedWindow("main", cv2.WINDOW_NORMAL)
 cv2.setMouseCallback("main", mouseEvent)
 
@@ -53,7 +82,8 @@ def LabelFrame(video_path, label_path):
     if not vidfile.isOpened():
         print(f"***** Unable to open {video}")
     fps = vidfile.get(cv2.CAP_PROP_FPS) or 30.0
-    total_frames = int(vidfile.get(cv2.CAP_PROP_FRAME_COUNT))
+    total_frames = get_video_frame_count(video_path)
+
     seek_step = int(round(5 * fps))
 
     sex = "female"
